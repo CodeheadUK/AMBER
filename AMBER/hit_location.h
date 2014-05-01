@@ -1,6 +1,8 @@
 #ifndef __HIT_LOCATION_H__
 #define __HIT_LOCATION_H__
 
+#include "equipment_location.h"
+
 class hit_location
 {
 	private:
@@ -18,7 +20,7 @@ class hit_location
 	hit_location parent_location;
 
 	public:
-
+	int damage(int value);
 
 
 };

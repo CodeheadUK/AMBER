@@ -4,11 +4,17 @@
 class equipment_location
 {
 	private:
-		char _name[16];
+		equipment_type _type;
 		int _qty;
 
 	public:
 
 };
+
+enum equipment_types
+{
+	engine,
+	heat_sink,
+}
 
 #endif
