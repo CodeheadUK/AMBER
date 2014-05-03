@@ -18,8 +18,6 @@ AppGlobalVars AppGlobals; // Screen Res, etc
 
 HINSTANCE gInst;
 
-//#include "render.h"
-
 bool RegisterWin();
 bool StartGL(int ScrX, int ScrY, int BPP);
 bool RenderProc(LPVOID lpParam);
@@ -30,7 +28,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 {
 	gInst = hInstance;
 
-	createWindow("GL3 Window", 500, 500); // Create our OpenGL window  
+	createWindow("GL3 Window", 800, 600); // Create our OpenGL window  
   
 	gl.setupScene(); // Setup our OpenGL scene  
 
@@ -40,8 +38,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 	*/  
 	while (runLevel)  
 	{  
-		//puts("Running");
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) { // If we have a message to process, process it  
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{ // If we have a message to process, process it  
 			if (msg.message == WM_QUIT) {  
 				runLevel = false; // Set running to false if we have a message to quit  
 			}  
@@ -50,16 +48,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 				DispatchMessage(&msg);  
 			}  
 		}  
-		else { // If we don't have a message to process  
+		else
+		{ // If we don't have a message to process  
 			gl.renderScene(); // Render our scene (which also handles swapping of buffers)  
 		}  
 
 		if(Keys[VK_ESCAPE])
-			runLevel = 0;
-	}  
-  
-	return (int) msg.wParam;
+		{
+			PostQuitMessage(0);
+			OutputDebugString("Esc pressed!\n");
+		}
 
+	}  
+	
+	OutputDebugString("Quitting!\n");
+	exit(0);
 }
 
 
@@ -73,17 +76,19 @@ LRESULT CALLBACK GLWinProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_CLOSE:
+			OutputDebugString("Close Message!\n");
 			runLevel=0;
 			break;
 
 		case WM_DESTROY:
+			OutputDebugString("Destroy Message!\n");
 			runLevel=0;
 			PostQuitMessage(0);
 			break;
 
 		// Grab inputs
 		case WM_KEYDOWN:
-			puts("Key!");
+			OutputDebugString("Key!\n");
 			Keys[wParam] = TRUE;
 			return 0;
 
@@ -129,13 +134,13 @@ bool createWindow(LPCSTR title, int width, int height) {
 	glWin.lpfnWndProc	= (WNDPROC) GLWinProc;				         
 	glWin.cbClsExtra	= 0;
 	glWin.cbWndExtra	= 0;
-	glWin.hInstance	= gInst;
-	glWin.hIcon	= LoadIcon(NULL, IDI_APPLICATION);			      // Default icon
-	glWin.hCursor	= LoadCursor(NULL, IDI_APPLICATION);		     // Default pointer
+	glWin.hInstance		= gInst;
+	glWin.hIcon			= LoadIcon(NULL, IDI_APPLICATION);			      // Default icon
+	glWin.hCursor		= LoadCursor(NULL, IDI_APPLICATION);		     // Default pointer
  	glWin.hbrBackground	= NULL;
  	glWin.lpszMenuName	= NULL;
  	glWin.lpszClassName	= "OpenGLBaseWin";
-	glWin.hIconSm=NULL;
+	glWin.hIconSm		= NULL;
 
 	if(!RegisterClassEx(&glWin)) {
 		return false;				

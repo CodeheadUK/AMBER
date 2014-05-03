@@ -3,11 +3,12 @@
 #include "opengl_context.h"
 
 OpenGLContext::OpenGLContext(void) {
-
+	OutputDebugString("GL Constructor complete\n");
 }
 
 OpenGLContext::OpenGLContext(HWND window) {
 	create30Context(window);
+	OutputDebugString("GL Constructor complete\n");
 }
 
 /** 
@@ -20,7 +21,10 @@ OpenGLContext::~OpenGLContext(void) {
 	wglDeleteContext(glrc); // Delete our rendering context
 
 	ReleaseDC(hwnd, hdc); // Release the device context from our window
+
+	OutputDebugString("GL Destructor complete\n");
 }
+
 
 /**
 create30Context creates an OpenGL context and attaches it to the window provided by
@@ -35,6 +39,7 @@ bool OpenGLContext::create30Context(HWND window) {
 	PIXELFORMATDESCRIPTOR pfd; // Create a new PIXELFORMATDESCRIPTOR (PFD)  
 	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR)); // Clear our  PFD  
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR); // Set the size of the PFD to the size of the class  
+	pfd.nVersion = 1;
 	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW; // Enable double buffering, opengl support and drawing to a window  
 	pfd.iPixelType = PFD_TYPE_RGBA; // Set our application to use RGBA pixels  
 	pfd.cColorBits = 32; // Give us 32 bits of color information (the higher, the more colors)  
@@ -44,14 +49,14 @@ bool OpenGLContext::create30Context(HWND window) {
 	int nPixelFormat = ChoosePixelFormat(hdc, &pfd); // Check if our PFD is valid and get a pixel format back  
 	if (nPixelFormat == 0) // If it fails  
 		return false;  
-  
+
 	bool bResult = SetPixelFormat(hdc, nPixelFormat, &pfd); // Try and set the pixel format based on our PFD  
 	if (!bResult) // If it fails  
 		return false; 
-
+	
 	HGLRC tempOpenGLContext = wglCreateContext(hdc); // Create an OpenGL 2.1 context for our device context  
 	wglMakeCurrent(hdc, tempOpenGLContext); // Make the OpenGL 2.1 context current and active  
-  
+ 
 	GLenum error = glewInit(); // Enable GLEW  
 	if (error != GLEW_OK) // If GLEW fails  
 		return false; 
@@ -77,7 +82,10 @@ bool OpenGLContext::create30Context(HWND window) {
 	glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]); // Get back the OpenGL MAJOR version we are using  
 	glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]); // Get back the OpenGL MAJOR version we are using  
   
-	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl; // Output which version of OpenGL we are using On Windows, you won’t get a console for a Win32 Application, but a nifty trick to get console output, is to open up Command Prompt, navigate to your directory with your executable file, and use something like: “program.exe > temp.txt”  
+	char msg[256];
+
+	sprintf(msg, "Using OpenGL %d.%d\n",glVersion[0],glVersion[1]);
+	OutputDebugString(msg);
 
 	return true; // We have successfully created a context, return true
 }
@@ -86,7 +94,9 @@ bool OpenGLContext::create30Context(HWND window) {
 setupScene will contain anything we need to setup before we render 
 */  
 void OpenGLContext::setupScene(void) {  
-	glClearColor(0.4f, 0.6f, 0.9f, 0.0f); // Set the clear color based on Microsofts CornflowerBlue (default in XNA)  
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Set the clear color based on Microsofts CornflowerBlue (default in XNA)  
+
+	shader = new Shader("shader.vert", "shader.frag");
 }  
 
 /** 
@@ -111,8 +121,16 @@ Any of your other rendering code will go here.
  
 Finally we are going to swap buffers. 
 */  
-void OpenGLContext::renderScene(void) {  
+void OpenGLContext::renderScene(void) 
+{
 	glViewport(0, 0, winWidth, winHeight); // Set the viewport size to fill the window  
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Clear required buffers  
+
+	shader->bind();
+
+
+
+	shader->unbind();
+
 	SwapBuffers(hdc); // Swap buffers so we can see our rendering  
 } 

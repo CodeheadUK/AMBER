@@ -1,6 +1,8 @@
 #ifndef __OPENGL_CONTEXT_H
 #define __OPENGL_CONTEXT_H
 
+#include "shader.h"
+
 class OpenGLContext {
 
 public:
@@ -15,6 +17,8 @@ public:
 private:
 		int winWidth;
 		int winHeight;
+
+		Shader *shader;
 
 protected:
 		HGLRC	glrc;
