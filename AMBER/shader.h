@@ -7,6 +7,9 @@
 #include <stdlib.h>
 
 #include <string>
+#include <fstream>
+
+static void validateShader(GLuint shader, const char* file);
 
 class Shader {
 public:
@@ -25,5 +28,7 @@ private:
 	unsigned int shader_id;
 	unsigned int shader_vp;
 	unsigned int shader_fp;
+
+	bool inited; // Whether or not we have initialized the shader
 };
 #endif

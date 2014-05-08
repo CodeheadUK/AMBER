@@ -97,6 +97,42 @@ void OpenGLContext::setupScene(void) {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Set the clear color based on Microsofts CornflowerBlue (default in XNA)  
 
 	shader = new Shader("shader.vert", "shader.frag");
+
+	validateShader(shader->id(), "");
+
+	createSquare(); // Create our square 
+
+	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
+}  
+
+/** 
+createSquare is used to create the Vertex Array Object which will hold our square. We will 
+be hard coding in the vertices for the square, which will be done in this method. 
+*/  
+void OpenGLContext::createSquare(void) {  
+  float* vertices = new float[18];  // Vertices for our square  
+  
+vertices[0] = -0.5; vertices[1] = -0.5; vertices[2] = 0.0; // Bottom left corner  
+vertices[3] = -0.5; vertices[4] = 0.5; vertices[5] = 0.0; // Top left corner  
+vertices[6] = 0.5; vertices[7] = 0.5; vertices[8] = 0.0; // Top Right corner  
+  
+vertices[9] = 0.5; vertices[10] = -0.5; vertices[11] = 0.0; // Bottom right corner  
+vertices[12] = -0.5; vertices[13] = -0.5; vertices[14] = 0.0; // Bottom left corner  
+vertices[15] = 0.5; vertices[16] = 0.5; vertices[17] = 0.0; // Top Right corner  
+  
+glGenVertexArrays(1, &vaoID[0]); // Create our Vertex Array Object  
+glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object so we can use it  
+  
+glGenBuffers(1, vboID); // Generate our Vertex Buffer Object  
+glBindBuffer(GL_ARRAY_BUFFER, vboID[0]); // Bind our Vertex Buffer Object  
+glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW  
+  
+glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer  
+  
+glEnableVertexAttribArray(0); // Disable our Vertex Array Object  
+glBindVertexArray(0); // Disable our Vertex Buffer Object 
+
+delete [] vertices; // Delete our vertices from memory
 }  
 
 /** 
@@ -126,9 +162,25 @@ void OpenGLContext::renderScene(void)
 	glViewport(0, 0, winWidth, winHeight); // Set the viewport size to fill the window  
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Clear required buffers  
 
+	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.f)); // Create our view matrix which will translate us back 5 units  
+	modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));  // Create our model matrix which will halve the size of our model  
+
 	shader->bind();
 
+	int projectionMatrixLocation = glGetUniformLocation(shader->id(), "projectionMatrix"); // Get the location of our projection matrix in the shader  
+	int viewMatrixLocation = glGetUniformLocation(shader->id(), "viewMatrix"); // Get the location of our view matrix in the shader  
+	int modelMatrixLocation = glGetUniformLocation(shader->id(), "modelMatrix"); // Get the location of our model matrix in the shader 
 
+	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]); // Send our projection matrix to the shader  
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &viewMatrix[0][0]); // Send our view matrix to the shader  
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // Send our model matrix to the shader  
+
+
+	glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object  
+  
+	glDrawArrays(GL_TRIANGLES, 0, 6); // Draw our square  
+  
+	glBindVertexArray(0); // Unbind our Vertex Array Object  
 
 	shader->unbind();
 
