@@ -9,7 +9,7 @@
 #include <string>
 #include <fstream>
 
-static void validateShader(GLuint shader, const char* file);
+
 
 class Shader {
 public:

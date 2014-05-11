@@ -1,9 +1,7 @@
 // AMBER.cpp : Defines the entry point for the application.
 //
 #include "stdafx.h"
-
 #include "headers.h"
-
 #include <stdio.h>
 
 
@@ -50,7 +48,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 		}  
 		else
 		{ // If we don't have a message to process  
-			gl.renderScene(); // Render our scene (which also handles swapping of buffers)  
+			gl.renderScene(Keys); // Render our scene (which also handles swapping of buffers)  
 		}  
 
 		if(Keys[VK_ESCAPE])
@@ -88,7 +86,9 @@ LRESULT CALLBACK GLWinProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 		// Grab inputs
 		case WM_KEYDOWN:
-			OutputDebugString("Key!\n");
+			char msg_str[256];
+			sprintf(msg_str, "Key %d pressed\n", wParam);
+			OutputDebugString(msg_str);
 			Keys[wParam] = TRUE;
 			return 0;
 

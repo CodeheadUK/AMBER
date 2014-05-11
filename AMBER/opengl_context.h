@@ -12,10 +12,14 @@ public:
 		bool create30Context(HWND hwnd); // Creation of our OpenGL 3.x context
 		void setupScene(void); // All scene information can be setup here
 		void reshapeWindow(int w, int h); // Method to get our window width and height on resize
-		void renderScene(void); // Render scene (display method from previous OpenGL tutorials)
+		void renderScene(char* KeyPressed); // Render scene (display method from previous OpenGL tutorials)
 
 		void createSquare(void); // Method for creating our squares Vertex Array Object  
 
+		void advanceCam(float x);
+		void strafeCam(float x);
+		void rotateCam(float roll, float pitch, float yaw);
+		glm::mat4 getCamMatrix(void);
 
 private:
 		int winWidth;
@@ -29,6 +33,10 @@ private:
 		glm::mat4 projectionMatrix; // Store the projection matrix  
 		glm::mat4 viewMatrix;		// Store the view matrix  
 		glm::mat4 modelMatrix;		// Store the model matrix 
+
+		// Camera Parameters
+		glm::vec3 camPos, camVec, camUp;
+		float camPitch, camYaw; 
 
 protected:
 		HGLRC	glrc;

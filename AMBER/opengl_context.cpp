@@ -3,17 +3,16 @@
 #include "opengl_context.h"
 
 OpenGLContext::OpenGLContext(void) {
-	OutputDebugString("GL Constructor complete\n");
+
 }
 
 OpenGLContext::OpenGLContext(HWND window) {
 	create30Context(window);
-	OutputDebugString("GL Constructor complete\n");
 }
 
 /** 
-Destructor for our OpenGLContext class which will clean up our rendering context 
-and release the device context from the current window. 
+Clean up rendering context 
+Release the device context from the current window. 
 */
 OpenGLContext::~OpenGLContext(void) {
 
@@ -21,8 +20,6 @@ OpenGLContext::~OpenGLContext(void) {
 	wglDeleteContext(glrc); // Delete our rendering context
 
 	ReleaseDC(hwnd, hdc); // Release the device context from our window
-
-	OutputDebugString("GL Destructor complete\n");
 }
 
 
@@ -63,7 +60,7 @@ bool OpenGLContext::create30Context(HWND window) {
 
 	int attributes[] = {  
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 3, // Set the MAJOR version of OpenGL to 3  
-		WGL_CONTEXT_MINOR_VERSION_ARB, 2, // Set the MINOR version of OpenGL to 2  
+		WGL_CONTEXT_MINOR_VERSION_ARB, 3, // Set the MINOR version of OpenGL to 2  
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, // Set our OpenGL context to be forward compatible  
 		0  
 	};
@@ -94,15 +91,20 @@ bool OpenGLContext::create30Context(HWND window) {
 setupScene will contain anything we need to setup before we render 
 */  
 void OpenGLContext::setupScene(void) {  
+	
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Set the clear color based on Microsofts CornflowerBlue (default in XNA)  
 
 	shader = new Shader("shader.vert", "shader.frag");
 
-	validateShader(shader->id(), "");
-
 	createSquare(); // Create our square 
 
 	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
+	
+	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	camPos = glm::vec3(0.0f, 0.0f, -5.0f);
+	camVec = glm::vec3(0.0f, 0.0f, 1.0f);
+	camPitch = 0.0f;
+	camYaw = 0.0f;
 }  
 
 /** 
@@ -135,6 +137,33 @@ glBindVertexArray(0); // Disable our Vertex Buffer Object
 delete [] vertices; // Delete our vertices from memory
 }  
 
+void OpenGLContext::advanceCam(float x)
+{
+	camPos +=  camVec * x;
+}
+
+void OpenGLContext::strafeCam(float x)
+{
+	camPos +=  glm::cross(camVec * x, camUp);
+}
+
+void OpenGLContext::rotateCam(float roll, float pitch, float yaw)
+{
+	camPitch += pitch;
+	camYaw	 += yaw;
+}
+
+glm::mat4 OpenGLContext::getCamMatrix(void)
+{
+	glm::vec3 camTgt(0.0f);
+	camTgt[2] += 1.0f;
+
+	camTgt = glm::rotateX(camTgt, camPitch); 
+	camVec = glm::rotateY(camTgt, camYaw); 
+
+	return glm::lookAt(camPos, camPos + camVec, camUp);
+}
+
 /** 
 reshapeWindow is called every time our window is resized, and it sets our windowWidth and windowHeight 
 so that we can set our viewport size. 
@@ -157,12 +186,56 @@ Any of your other rendering code will go here.
  
 Finally we are going to swap buffers. 
 */  
-void OpenGLContext::renderScene(void) 
+void OpenGLContext::renderScene(char* KeyPressed) 
 {
+	// Handle key presses
+	if(KeyPressed[VK_LEFT])
+	{
+		strafeCam(-0.01f);
+	}
+
+	if(KeyPressed[VK_RIGHT])
+	{
+		strafeCam( 0.01f);
+	}
+
+	if(KeyPressed[VK_UP])
+	{
+		advanceCam( 0.01f);
+	}
+
+	if(KeyPressed[VK_DOWN])
+	{
+		advanceCam(-0.01f);
+	}
+
+	if(KeyPressed[188])
+	{
+		rotateCam( 0.0f, 0.0f, 0.01f);
+	}
+
+	if(KeyPressed[190])
+	{
+		rotateCam( 0.0f, 0.0f, -0.01f);
+	}
+
+	if(KeyPressed[35])
+	{
+		rotateCam( 0.0f, 0.01f, 0.0f);
+	}
+
+	if(KeyPressed[36])
+	{
+		rotateCam( 0.0f,-0.01f, 0.0f);
+	}
+
+
 	glViewport(0, 0, winWidth, winHeight); // Set the viewport size to fill the window  
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Clear required buffers  
 
-	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.f)); // Create our view matrix which will translate us back 5 units  
+	//viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.f)); // Create our view matrix which will translate us back 5 units  
+	//viewMatrix = glm::translate(glm::mat4(1.0f), camera); // Create our view matrix based on the camera position
+	viewMatrix = getCamMatrix();
 	modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));  // Create our model matrix which will halve the size of our model  
 
 	shader->bind();
@@ -173,6 +246,11 @@ void OpenGLContext::renderScene(void)
 
 	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]); // Send our projection matrix to the shader  
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &viewMatrix[0][0]); // Send our view matrix to the shader  
+
+	glm::vec4 v(0.01f, 0.0f, 0.0f, 0.0f);
+
+	//modelMatrix = glm::translate(&modelMatrix,&v); 
+
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // Send our model matrix to the shader  
 
 
