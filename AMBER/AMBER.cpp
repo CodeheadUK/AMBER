@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "headers.h"
 #include <stdio.h>
+#include <ctime>
 
 
 // Globals
@@ -30,6 +31,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
   
 	gl.setupScene(); // Setup our OpenGL scene  
 
+	long curFrame, lastFrame;
+
+	lastFrame = curFrame = clock();
+
 
 	/** 
 	This is our main loop, it continues for as long as running is true 
@@ -48,7 +53,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 		}  
 		else
 		{ // If we don't have a message to process  
-			gl.renderScene(Keys); // Render our scene (which also handles swapping of buffers)  
+			lastFrame = curFrame;
+			curFrame = clock();
+			gl.renderScene(Keys, curFrame - lastFrame); // Render our scene (which also handles swapping of buffers)  
 		}  
 
 		if(Keys[VK_ESCAPE])

@@ -186,47 +186,50 @@ Any of your other rendering code will go here.
  
 Finally we are going to swap buffers. 
 */  
-void OpenGLContext::renderScene(char* KeyPressed) 
+void OpenGLContext::renderScene(char* KeyPressed, long frameTicks) 
 {
+	char dmsg[256];
+	sprintf(dmsg,"FrameTime %d\n", frameTicks);
+	OutputDebugString(dmsg);
 	// Handle key presses
 	if(KeyPressed[VK_LEFT])
 	{
-		strafeCam(-0.01f);
+		strafeCam(-0.01f * frameTicks);
 	}
 
 	if(KeyPressed[VK_RIGHT])
 	{
-		strafeCam( 0.01f);
+		strafeCam( 0.01f * frameTicks);
 	}
 
 	if(KeyPressed[VK_UP])
 	{
-		advanceCam( 0.01f);
+		advanceCam( 0.01f * frameTicks);
 	}
 
 	if(KeyPressed[VK_DOWN])
 	{
-		advanceCam(-0.01f);
+		advanceCam(-0.01f * frameTicks);
 	}
 
 	if(KeyPressed[188])
 	{
-		rotateCam( 0.0f, 0.0f, 0.01f);
+		rotateCam( 0.0f, 0.0f, 0.01f * frameTicks);
 	}
 
 	if(KeyPressed[190])
 	{
-		rotateCam( 0.0f, 0.0f, -0.01f);
+		rotateCam( 0.0f, 0.0f, -0.01f * frameTicks);
 	}
 
 	if(KeyPressed[35])
 	{
-		rotateCam( 0.0f, 0.01f, 0.0f);
+		rotateCam( 0.0f, 0.01f * frameTicks, 0.0f);
 	}
 
 	if(KeyPressed[36])
 	{
-		rotateCam( 0.0f,-0.01f, 0.0f);
+		rotateCam( 0.0f,-0.01f * frameTicks, 0.0f);
 	}
 
 

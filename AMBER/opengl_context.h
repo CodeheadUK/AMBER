@@ -12,7 +12,7 @@ public:
 		bool create30Context(HWND hwnd); // Creation of our OpenGL 3.x context
 		void setupScene(void); // All scene information can be setup here
 		void reshapeWindow(int w, int h); // Method to get our window width and height on resize
-		void renderScene(char* KeyPressed); // Render scene (display method from previous OpenGL tutorials)
+		void renderScene(char* KeyPressed, long frameTicks); // Render scene (display method from previous OpenGL tutorials)
 
 		void createSquare(void); // Method for creating our squares Vertex Array Object  
 
