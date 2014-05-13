@@ -38,6 +38,8 @@ private:
 		glm::vec3 camPos, camVec, camUp;
 		float camPitch, camYaw; 
 
+		float rotAngle; 
+
 protected:
 		HGLRC	glrc;
 		HDC		hdc;

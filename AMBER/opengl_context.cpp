@@ -105,6 +105,10 @@ void OpenGLContext::setupScene(void) {
 	camVec = glm::vec3(0.0f, 0.0f, 1.0f);
 	camPitch = 0.0f;
 	camYaw = 0.0f;
+
+	rotAngle = 0.0f;
+
+
 }  
 
 /** 
@@ -171,6 +175,7 @@ so that we can set our viewport size.
 void OpenGLContext::reshapeWindow(int w, int h) {  
 	winWidth = w; // Set the window width  
 	winHeight = h; // Set the window height  
+	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
 }  
 
 
@@ -191,6 +196,9 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	char dmsg[256];
 	sprintf(dmsg,"FrameTime %d\n", frameTicks);
 	OutputDebugString(dmsg);
+
+	rotAngle += 0.1f * frameTicks;
+
 	// Handle key presses
 	if(KeyPressed[VK_LEFT])
 	{
@@ -239,7 +247,7 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	//viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.f)); // Create our view matrix which will translate us back 5 units  
 	//viewMatrix = glm::translate(glm::mat4(1.0f), camera); // Create our view matrix based on the camera position
 	viewMatrix = getCamMatrix();
-	modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));  // Create our model matrix which will halve the size of our model  
+	modelMatrix = glm::rotate(rotAngle, camUp);  // Create our model matrix which will halve the size of our model  
 
 	shader->bind();
 
