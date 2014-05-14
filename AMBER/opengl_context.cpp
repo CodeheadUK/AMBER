@@ -97,11 +97,12 @@ void OpenGLContext::setupScene(void) {
 	shader = new Shader("shader.vert", "shader.frag");
 
 	createSquare(); // Create our square 
+	createHex();
 
 	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
 	
 	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	camPos = glm::vec3(0.0f, 0.0f, -5.0f);
+	camPos = glm::vec3(0.0f, 10.0f, -15.0f);
 	camVec = glm::vec3(0.0f, 0.0f, 1.0f);
 	camPitch = 0.0f;
 	camYaw = 0.0f;
@@ -140,6 +141,49 @@ glBindVertexArray(0); // Disable our Vertex Buffer Object
 
 delete [] vertices; // Delete our vertices from memory
 }  
+
+void OpenGLContext::createHex(void)
+{
+	float* vertices = new float[54];  // Vertices for our hex
+
+	vertices[0]  =   0.0f; vertices[1] = 0.0f; vertices[2] =   0.0f;     // pt0
+	vertices[3]  = -10.0f; vertices[4] = 0.0f; vertices[5] =  17.32f;    // pt23
+	vertices[6]  =  10.0f; vertices[7] = 0.0f; vertices[8] =  17.32f;    // pt8
+
+	vertices[9]  =   0.0f; vertices[10]  = 0.0f; vertices[11] =   0.0f;  // pt0
+	vertices[12] =  10.0f; vertices[13]  = 0.0f; vertices[14] =  17.32f; // pt8
+	vertices[15] =  20.0f; vertices[16]  = 0.0f; vertices[17] =   0.0f;  // pt11
+
+	vertices[18] =   0.0f; vertices[19] = 0.0f; vertices[20]  =   0.0f;  // pt0
+	vertices[21] =  20.0f; vertices[22] = 0.0f; vertices[23] =   0.0f;  // pt11
+	vertices[24] =  10.0f; vertices[25] = 0.0f; vertices[26] = -17.32f; // pt14
+
+	vertices[27] =   0.0f; vertices[28] = 0.0f; vertices[29] =   0.0f;  // pt0
+	vertices[30] =  10.0f; vertices[31] = 0.0f; vertices[32] = -17.32f; // pt14
+	vertices[33] = -10.0f; vertices[34] = 0.0f; vertices[35] = -17.32f; // pt17
+
+	vertices[36] =   0.0f; vertices[37] = 0.0f; vertices[38] =   0.0f;  // pt0
+	vertices[39] = -10.0f; vertices[40] = 0.0f; vertices[41] = -17.32f; // pt17
+	vertices[42] = -20.0f; vertices[43] = 0.0f; vertices[44] =   0.0f;  // pt20
+
+	vertices[45] =   0.0f; vertices[46] = 0.0f; vertices[47] =   0.0f;  // pt0
+	vertices[48] = -20.0f; vertices[49] = 0.0f; vertices[50] =   0.0f;  // pt20
+	vertices[51] = -10.0f; vertices[52] = 0.0f; vertices[53] =  17.32f; // pt23
+
+	glGenVertexArrays(1, &vaoID[1]); // Create our Vertex Array Object  
+	glBindVertexArray(vaoID[1]); // Bind our Vertex Array Object so we can use it  
+  
+	glGenBuffers(1, hexVboID); // Generate our Vertex Buffer Object  
+	glBindBuffer(GL_ARRAY_BUFFER, hexVboID[0]); // Bind our Vertex Buffer Object  
+	glBufferData(GL_ARRAY_BUFFER, 54 * sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW  
+  
+	glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer  
+  
+	glEnableVertexAttribArray(0); // Disable our Vertex Array Object  
+	glBindVertexArray(0); // Disable our Vertex Buffer Object 
+
+	delete [] vertices; // Delete our vertices from memory
+}
 
 void OpenGLContext::advanceCam(float x)
 {
@@ -268,6 +312,12 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object  
   
 	glDrawArrays(GL_TRIANGLES, 0, 6); // Draw our square  
+
+
+	glBindVertexArray(vaoID[1]); // Bind the Hex Vertex Array
+  
+	glDrawArrays(GL_TRIANGLES, 0, 18); // Draw our hex 
+
   
 	glBindVertexArray(0); // Unbind our Vertex Array Object  
 

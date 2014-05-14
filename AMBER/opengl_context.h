@@ -15,6 +15,7 @@ public:
 		void renderScene(char* KeyPressed, long frameTicks); // Render scene (display method from previous OpenGL tutorials)
 
 		void createSquare(void); // Method for creating our squares Vertex Array Object  
+		void createHex(void); // Method for creating our map hex object  
 
 		void advanceCam(float x);
 		void strafeCam(float x);
@@ -27,8 +28,10 @@ private:
 
 		Shader *shader;
 
-		unsigned int vaoID[1];		// Our Vertex Array Object  
+		unsigned int vaoID[2];		// Our Vertex Array Object  
   		unsigned int vboID[1];		// Our Vertex Buffer Object 
+		unsigned int hexVboID[1];
+
 
 		glm::mat4 projectionMatrix; // Store the projection matrix  
 		glm::mat4 viewMatrix;		// Store the view matrix  
