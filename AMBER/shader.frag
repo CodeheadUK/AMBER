@@ -1,7 +1,9 @@
-#version 150 core
+#version 150 core  
 
-void main() 
+in vec3 pass_Color;  
+out vec4 out_Color; 
+
+void main(void) 
 {
-    // Set the output color of our current pixel
-    gl_FragColor = vec4(0.5);
-}
+	out_Color = vec4(pass_Color, 1.0);  
+} 

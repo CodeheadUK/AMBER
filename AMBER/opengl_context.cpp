@@ -60,7 +60,7 @@ bool OpenGLContext::create30Context(HWND window) {
 
 	int attributes[] = {  
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 3, // Set the MAJOR version of OpenGL to 3  
-		WGL_CONTEXT_MINOR_VERSION_ARB, 3, // Set the MINOR version of OpenGL to 2  
+		WGL_CONTEXT_MINOR_VERSION_ARB, 2, // Set the MINOR version of OpenGL to 2  
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, // Set our OpenGL context to be forward compatible  
 		0  
 	};
@@ -96,13 +96,14 @@ void OpenGLContext::setupScene(void) {
 
 	shader = new Shader("shader.vert", "shader.frag");
 
-	createSquare(); // Create our square 
-	createHex();
+	obj.BuildSquare(); // Create our square 
+	//createHex();
 
 	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
 	
 	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	camPos = glm::vec3(0.0f, 10.0f, -15.0f);
+	//camPos = glm::vec3(0.0f, 10.0f, -15.0f);
+	camPos = glm::vec3(0.0f, 0.0f, -5.0f);
 	camVec = glm::vec3(0.0f, 0.0f, 1.0f);
 	camPitch = 0.0f;
 	camYaw = 0.0f;
@@ -118,28 +119,64 @@ be hard coding in the vertices for the square, which will be done in this method
 */  
 void OpenGLContext::createSquare(void) {  
   float* vertices = new float[18];  // Vertices for our square  
+  float* cols = new float[18]; // Colours!
   
 vertices[0] = -0.5; vertices[1] = -0.5; vertices[2] = 0.0; // Bottom left corner  
+
+cols[0] = 1.0f; 
+cols[1] = 0.0f;
+cols[2] = 0.0f;
+
 vertices[3] = -0.5; vertices[4] = 0.5; vertices[5] = 0.0; // Top left corner  
-vertices[6] = 0.5; vertices[7] = 0.5; vertices[8] = 0.0; // Top Right corner  
+
+cols[3] = 0.0f; 
+cols[4] = 1.0f;
+cols[5] = 0.0f;
+
+vertices[6] = 0.5; vertices[7] = 0.5; vertices[8] = 0.0; // Top Right corner 
+
+cols[6] = 0.0f; 
+cols[7] = 0.0f;
+cols[8] = 1.0f;
   
 vertices[9] = 0.5; vertices[10] = -0.5; vertices[11] = 0.0; // Bottom right corner  
+
+cols[9] = 1.0f; 
+cols[10] = 1.0f;
+cols[11] = 0.0f;
+
 vertices[12] = -0.5; vertices[13] = -0.5; vertices[14] = 0.0; // Bottom left corner  
+
+cols[12] = 1.0f; 
+cols[13] = 0.0f;
+cols[14] = 1.0f;
+
 vertices[15] = 0.5; vertices[16] = 0.5; vertices[17] = 0.0; // Top Right corner  
-  
+ 
+cols[15] = 0.0f; 
+cols[16] = 1.0f;
+cols[17] = 1.0f;
+
 glGenVertexArrays(1, &vaoID[0]); // Create our Vertex Array Object  
 glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object so we can use it  
   
-glGenBuffers(1, vboID); // Generate our Vertex Buffer Object  
+glGenBuffers(2, &vboID[0]); // Generate our Vertex Buffer Objects
+
 glBindBuffer(GL_ARRAY_BUFFER, vboID[0]); // Bind our Vertex Buffer Object  
 glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(GLfloat), vertices, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW  
+glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer 
+
+glBindBuffer(GL_ARRAY_BUFFER, vboID[1]); // Bind our second Vertex Buffer Object 
+glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(GLfloat), cols, GL_STATIC_DRAW); // Set the size and data of our VBO and set it to STATIC_DRAW 
+glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer  
   
-glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer  
+glEnableVertexAttribArray(1); // Enable the second vertex attribute array
   
-glEnableVertexAttribArray(0); // Disable our Vertex Array Object  
+//glEnableVertexAttribArray(0); // Disable our Vertex Array Object  
 glBindVertexArray(0); // Disable our Vertex Buffer Object 
 
 delete [] vertices; // Delete our vertices from memory
+delete [] cols; // Delete our vertices from memory  
 }  
 
 void OpenGLContext::createHex(void)
@@ -179,7 +216,7 @@ void OpenGLContext::createHex(void)
   
 	glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0); // Set up our vertex attributes pointer  
   
-	glEnableVertexAttribArray(0); // Disable our Vertex Array Object  
+	//glEnableVertexAttribArray(0); // Disable our Vertex Array Object  
 	glBindVertexArray(0); // Disable our Vertex Buffer Object 
 
 	delete [] vertices; // Delete our vertices from memory
@@ -239,7 +276,7 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 {
 	char dmsg[256];
 	sprintf(dmsg,"FrameTime %d\n", frameTicks);
-	OutputDebugString(dmsg);
+	//OutputDebugString(dmsg);
 
 	rotAngle += 0.1f * frameTicks;
 
@@ -309,14 +346,12 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // Send our model matrix to the shader  
 
 
-	glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object  
-  
-	glDrawArrays(GL_TRIANGLES, 0, 6); // Draw our square  
+//	glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object  
+//	glDrawArrays(GL_TRIANGLES, 0, 6); // Draw our square  
+	obj.Render();
 
-
-	glBindVertexArray(vaoID[1]); // Bind the Hex Vertex Array
-  
-	glDrawArrays(GL_TRIANGLES, 0, 18); // Draw our hex 
+	//glBindVertexArray(vaoID[1]); // Bind the Hex Vertex Array
+	//glDrawArrays(GL_TRIANGLES, 0, 18); // Draw our hex 
 
   
 	glBindVertexArray(0); // Unbind our Vertex Array Object  

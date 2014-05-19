@@ -2,6 +2,7 @@
 #define __OPENGL_CONTEXT_H
 
 #include "shader.h"
+#include "gl_object.h"
 
 class OpenGLContext {
 
@@ -28,8 +29,10 @@ private:
 
 		Shader *shader;
 
+		GLObject obj;
+
 		unsigned int vaoID[2];		// Our Vertex Array Object  
-  		unsigned int vboID[1];		// Our Vertex Buffer Object 
+  		unsigned int vboID[2];		// Our Vertex Buffer Object 
 		unsigned int hexVboID[1];
 
 

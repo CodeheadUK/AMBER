@@ -84,6 +84,7 @@
     <ClInclude Include="AMBER.h" />
     <ClInclude Include="AMBER_Defs.h" />
     <ClInclude Include="equipment_location.h" />
+    <ClInclude Include="gl_object.h" />
     <ClInclude Include="headers.h" />
     <ClInclude Include="hit_location.h" />
     <ClInclude Include="opengl_context.h" />
@@ -94,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AMBER.cpp" />
+    <ClCompile Include="gl_object.cpp" />
     <ClCompile Include="opengl_context.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="stdafx.cpp">
