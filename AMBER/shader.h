@@ -21,6 +21,8 @@ public:
 	void unbind();
     
 	unsigned int id();
+
+	unsigned int texUnit;
     
 private:
 	unsigned int shader_id;

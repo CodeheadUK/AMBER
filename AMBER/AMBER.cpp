@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <ctime>
 
-
 // Globals
 OpenGLContext gl; // GL Class
 int runLevel = 1; 
@@ -27,7 +26,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 {
 	gInst = hInstance;
 
-	createWindow("GL3 Window", 800, 600); // Create our OpenGL window  
+	createWindow("OpenGL3.3 Core", 800, 600); // Create our OpenGL window  
   
 	gl.setupScene(); // Setup our OpenGL scene  
 

@@ -22,6 +22,8 @@ public:
 		void strafeCam(float x);
 		void rotateCam(float roll, float pitch, float yaw);
 		glm::mat4 getCamMatrix(void);
+		bool LoadTexture(char *TexName, GLuint TexHandle);
+
 
 private:
 		int winWidth;
@@ -30,6 +32,9 @@ private:
 		Shader *shader;
 
 		GLObject obj;
+		GLObject hex;
+
+		unsigned int texID;
 
 		unsigned int vaoID[2];		// Our Vertex Array Object  
   		unsigned int vboID[2];		// Our Vertex Buffer Object 

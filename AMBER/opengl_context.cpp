@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "headers.h"
 #include "opengl_context.h"
+#include "tga.h"
 
 OpenGLContext::OpenGLContext(void) {
 
@@ -60,7 +61,7 @@ bool OpenGLContext::create30Context(HWND window) {
 
 	int attributes[] = {  
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 3, // Set the MAJOR version of OpenGL to 3  
-		WGL_CONTEXT_MINOR_VERSION_ARB, 2, // Set the MINOR version of OpenGL to 2  
+		WGL_CONTEXT_MINOR_VERSION_ARB, 3, // Set the MINOR version of OpenGL to 3  
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, // Set our OpenGL context to be forward compatible  
 		0  
 	};
@@ -92,24 +93,26 @@ setupScene will contain anything we need to setup before we render
 */  
 void OpenGLContext::setupScene(void) {  
 	
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Set the clear color based on Microsofts CornflowerBlue (default in XNA)  
+	glClearColor(0.1f, 0.1f, 0.1f, 0.0f); 
 
 	shader = new Shader("shader.vert", "shader.frag");
 
 	obj.BuildSquare(); // Create our square 
-	//createHex();
+	hex.BuildHex();
 
-	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
+	projectionMatrix = glm::perspective(45.0f, (float)winWidth / (float)winHeight, 0.1f, 5000.f);  // Create our perspective projection matrix  
 	
 	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	//camPos = glm::vec3(0.0f, 10.0f, -15.0f);
-	camPos = glm::vec3(0.0f, 0.0f, -5.0f);
+	camPos = glm::vec3(0.0f, 30.0f, -50.0f);
 	camVec = glm::vec3(0.0f, 0.0f, 1.0f);
 	camPitch = 0.0f;
 	camYaw = 0.0f;
 
 	rotAngle = 0.0f;
 
+	glGenTextures(1, &texID);
+	LoadTexture("img\\Sq256Grass1.tga", texID);
 
 }  
 
@@ -256,7 +259,7 @@ so that we can set our viewport size.
 void OpenGLContext::reshapeWindow(int w, int h) {  
 	winWidth = w; // Set the window width  
 	winHeight = h; // Set the window height  
-	projectionMatrix = glm::perspective(60.0f, (float)winWidth / (float)winHeight, 0.1f, 100.f);  // Create our perspective projection matrix  
+	projectionMatrix = glm::perspective(45.0f, (float)winWidth / (float)winHeight, 0.1f, 5000.f);  // Create our perspective projection matrix  
 }  
 
 
@@ -274,11 +277,14 @@ Finally we are going to swap buffers.
 */  
 void OpenGLContext::renderScene(char* KeyPressed, long frameTicks) 
 {
+	
 	char dmsg[256];
 	sprintf(dmsg,"FrameTime %d\n", frameTicks);
 	//OutputDebugString(dmsg);
 
-	rotAngle += 0.1f * frameTicks;
+	glm::mat4 objPos;
+
+	//rotAngle -= 0.01f * frameTicks;
 
 	// Handle key presses
 	if(KeyPressed[VK_LEFT])
@@ -325,12 +331,16 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	glViewport(0, 0, winWidth, winHeight); // Set the viewport size to fill the window  
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Clear required buffers  
 
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE0);
+
 	//viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.f)); // Create our view matrix which will translate us back 5 units  
 	//viewMatrix = glm::translate(glm::mat4(1.0f), camera); // Create our view matrix based on the camera position
 	viewMatrix = getCamMatrix();
-	modelMatrix = glm::rotate(rotAngle, camUp);  // Create our model matrix which will halve the size of our model  
+	modelMatrix = glm::rotate(rotAngle, camUp);  
 
-	shader->bind();
+	
+    shader->bind();
 
 	int projectionMatrixLocation = glGetUniformLocation(shader->id(), "projectionMatrix"); // Get the location of our projection matrix in the shader  
 	int viewMatrixLocation = glGetUniformLocation(shader->id(), "viewMatrix"); // Get the location of our view matrix in the shader  
@@ -339,24 +349,82 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]); // Send our projection matrix to the shader  
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, &viewMatrix[0][0]); // Send our view matrix to the shader  
 
-	glm::vec4 v(0.01f, 0.0f, 0.0f, 0.0f);
-
-	//modelMatrix = glm::translate(&modelMatrix,&v); 
-
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // Send our model matrix to the shader  
 
+    glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glUniform1i(shader->texUnit, 0);
 
-//	glBindVertexArray(vaoID[0]); // Bind our Vertex Array Object  
-//	glDrawArrays(GL_TRIANGLES, 0, 6); // Draw our square  
+	// Draw map
+	int row, col;
+	float evenColOffset;
+	hex.Bind();
+	for(col = 0; col < 5 ; col++)
+	{
+		if(col % 2)
+		{
+			evenColOffset = 17.82;
+		}
+		else
+		{
+			evenColOffset = 0.0f;
+		}
+
+		for(row = 0; row < 15; row++)
+		{
+			objPos = glm::translate(modelMatrix, glm::vec3(31.0f * col, 0.0f, (36.64f * row) + evenColOffset));
+			glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &objPos[0][0]); // Send our model matrix to the shader 
+			hex.Render();
+		}
+	}
+
+	// Restore regular world view
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // Send our model matrix to the shader
+
+	obj.Bind();
 	obj.Render();
-
-	//glBindVertexArray(vaoID[1]); // Bind the Hex Vertex Array
-	//glDrawArrays(GL_TRIANGLES, 0, 18); // Draw our hex 
-
-  
-	glBindVertexArray(0); // Unbind our Vertex Array Object  
-
-	shader->unbind();
 
 	SwapBuffers(hdc); // Swap buffers so we can see our rendering  
 } 
+
+// Load a TGA texture
+bool OpenGLContext::LoadTexture(char *TexName, GLuint TexHandle)
+ {
+   GLenum err;
+   TGAImg Img;        // Image loader
+
+  // Load our Texture
+   if(Img.Load(TexName)!=IMG_OK)
+    return false;
+
+  //glEnable(GL_TEXTURE0);
+  err = glGetError();
+
+  glActiveTexture(GL_TEXTURE0);
+  err = glGetError();
+
+  glBindTexture(GL_TEXTURE_2D,TexHandle); // Set our Tex handle as current
+  err = glGetError();
+
+
+
+
+  // Create the texture
+   if(Img.GetBPP()==24)
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,Img.GetWidth(),Img.GetHeight(),0,GL_RGB,GL_UNSIGNED_BYTE,Img.GetImg());
+   else if(Img.GetBPP()==32)
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,Img.GetWidth(),Img.GetHeight(),0,GL_RGBA,GL_UNSIGNED_BYTE,Img.GetImg());
+   else
+    return false;
+
+  err = glGetError();
+
+  // Specify filtering and edge actions
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  return true;
+ }

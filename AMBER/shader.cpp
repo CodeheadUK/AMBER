@@ -117,9 +117,12 @@ void Shader::init(const char *vsFile, const char *fsFile) {
 
 	glBindAttribLocation(shader_id, 0, "in_Position"); // Bind a constant attribute location for positions of vertices
 	glBindAttribLocation(shader_id, 1, "in_Color"); // Bind another constant attribute location, this time for color
+	glBindAttribLocation(shader_id, 2, "in_UV"); // Bind a constant for UVs
 
     glLinkProgram(shader_id); // Link the vertex and fragment shaders in the program
     validateProgram(shader_id); // Validate the shader program
+
+	texUnit = glGetUniformLocation(shader_id, "texUnit"); // Get texUnit
 }
 
 /**
