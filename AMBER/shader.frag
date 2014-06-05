@@ -12,4 +12,5 @@ void main(void)
 {
 	out_Color = texture(texUnit, pass_UV);
 	//out_Color = vec4(pass_UV, 0.5, 1.0);  
+	//out_Color = vec4(1.0, 1.0, 1.0, 1.0);  
 } 

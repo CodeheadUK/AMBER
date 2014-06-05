@@ -3,6 +3,7 @@
 
 #include "shader.h"
 #include "gl_object.h"
+#include "gl_indexed_object.h"
 
 class OpenGLContext {
 
@@ -33,6 +34,7 @@ private:
 
 		GLObject obj;
 		GLObject hex;
+		GLIndexedObject iObj;
 
 		unsigned int texID;
 

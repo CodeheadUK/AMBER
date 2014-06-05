@@ -21,6 +21,7 @@
 #include "AMBER_Defs.h"
 #include "shader.h"
 #include "gl_object.h"
+#include "gl_indexed_object.h"
 
 
 #pragma comment (lib , "opengl32.lib") // Makes VC link the gl libs, 

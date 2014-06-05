@@ -93,18 +93,20 @@ setupScene will contain anything we need to setup before we render
 */  
 void OpenGLContext::setupScene(void) {  
 	
-	glClearColor(0.1f, 0.1f, 0.1f, 0.0f); 
+	glClearColor(0.1f, 0.1f, 0.9f, 0.0f); 
 
 	shader = new Shader("shader.vert", "shader.frag");
 
 	obj.BuildSquare(); // Create our square 
 	hex.BuildHex();
+	iObj.BuildSquare();
+
 
 	projectionMatrix = glm::perspective(45.0f, (float)winWidth / (float)winHeight, 0.1f, 5000.f);  // Create our perspective projection matrix  
 	
 	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	//camPos = glm::vec3(0.0f, 10.0f, -15.0f);
-	camPos = glm::vec3(0.0f, 30.0f, -50.0f);
+	camPos = glm::vec3(0.0f, 0.0f, -5.0f);
+	//camPos = glm::vec3(0.0f, 30.0f, -50.0f);
 	camVec = glm::vec3(0.0f, 0.0f, 1.0f);
 	camPitch = 0.0f;
 	camYaw = 0.0f;
@@ -356,7 +358,7 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 	glUniform1i(shader->texUnit, 0);
 
 	// Draw map
-	int row, col;
+	/*int row, col;
 	float evenColOffset;
 	hex.Bind();
 	for(col = 0; col < 5 ; col++)
@@ -374,15 +376,20 @@ void OpenGLContext::renderScene(char* KeyPressed, long frameTicks)
 		{
 			objPos = glm::translate(modelMatrix, glm::vec3(31.0f * col, 0.0f, (36.64f * row) + evenColOffset));
 			glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &objPos[0][0]); // Send our model matrix to the shader 
-			hex.Render();
+			//hex.Render();
 		}
-	}
+	}*/
 
 	// Restore regular world view
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // Send our model matrix to the shader
 
-	obj.Bind();
-	obj.Render();
+	iObj.Bind();
+	iObj.Render();
+	
+	//obj.Bind();
+	//obj.Render();
+
+	
 
 	SwapBuffers(hdc); // Swap buffers so we can see our rendering  
 } 
